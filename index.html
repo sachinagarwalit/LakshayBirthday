@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Birthday Invite! 🎉</title>
+  <title>You're Invited! 🎉</title>
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -265,6 +265,41 @@
       font-weight: 700;
       letter-spacing: 0.04em;
     }
+
+    /* ── Lightbox ── */
+    .invite-img-wrap { cursor: zoom-in; position: relative; }
+    .zoom-hint {
+      position: absolute; bottom: 8px; right: 10px;
+      background: rgba(0,0,0,0.45); color: #fff;
+      font-size: 0.72rem; font-weight: 800;
+      padding: 3px 9px; border-radius: 20px;
+      letter-spacing: 0.05em; pointer-events: none;
+      opacity: 1; transition: opacity 0.3s;
+    }
+    .lightbox-overlay {
+      display: none;
+      position: fixed; inset: 0; z-index: 999;
+      background: rgba(0,0,0,0.88);
+      align-items: center; justify-content: center;
+      animation: fadeIn 0.2s ease;
+    }
+    .lightbox-overlay.open { display: flex; }
+    @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+    .lightbox-overlay img {
+      max-width: 94vw; max-height: 90vh;
+      border-radius: 14px;
+      box-shadow: 0 12px 60px rgba(0,0,0,0.6);
+      animation: zoomIn 0.25s cubic-bezier(.22,1,.36,1);
+      cursor: zoom-out;
+    }
+    @keyframes zoomIn { from { transform: scale(0.85); opacity:0; } to { transform: scale(1); opacity:1; } }
+    .lightbox-close {
+      position: absolute; top: 18px; right: 22px;
+      font-size: 2rem; color: #fff; cursor: pointer;
+      line-height: 1; font-weight: 700; opacity: 0.8;
+      transition: opacity 0.15s, transform 0.15s;
+    }
+    .lightbox-close:hover { opacity: 1; transform: scale(1.15); }
 
     @media (max-width: 460px) {
       .details { grid-template-columns: 1fr; }
