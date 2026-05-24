@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>You're Invited! 🎉</title>
+  <title>Birthday Invite! 🎉</title>
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -330,7 +330,7 @@
          <img src="party.jpg" alt="Birthday Invitation" />
     -->
     
-	<img src="partyInvite3.PNG" alt="Birthday Invitation" />
+	<img src="partyInvite3.PNG" alt="Birthday Invitation" onclick="openLightbox(this.src)" />
     
   </div>
 
@@ -381,6 +381,15 @@
 
 </div>
 
+<!-- Lightbox -->
+<div class="lightbox-overlay" id="lightbox" onclick="closeLightbox()">
+  <span class="lightbox-close">✕</span>
+  <img id="lightboxImg" src="" alt="Invitation zoomed" onclick="event.stopPropagation()" />
+  <div id="lightboxMsg" style="display:none;color:#fff;font-family:'Nunito',sans-serif;font-size:1.1rem;font-weight:700;text-align:center;padding:2rem;">
+    📸 No image added yet.<br><span style="font-size:0.85rem;opacity:0.7">Replace the placeholder with your party image.</span>
+  </div>
+</div>
+
 <script>
   /* ═══════════════════════════════════════════════
      ✏️  CUSTOMIZE YOUR PARTY DETAILS HERE
@@ -400,6 +409,27 @@
 
   // Populate details
   document.getElementById('rsvpDeadline').textContent = PARTY.rsvpBy;
+
+  // Lightbox
+  function openLightbox() {
+    const img = document.querySelector('.invite-img-wrap img');
+    const lb  = document.getElementById('lightbox');
+    if (img) {
+      document.getElementById('lightboxImg').src = img.src;
+      document.getElementById('lightboxImg').style.display = 'block';
+      document.getElementById('lightboxMsg').style.display = 'none';
+    } else {
+      document.getElementById('lightboxImg').style.display = 'none';
+      document.getElementById('lightboxMsg').style.display = 'block';
+    }
+    lb.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
 
   // Counter state
   const counts = { kids: 0, adults: 1 };
