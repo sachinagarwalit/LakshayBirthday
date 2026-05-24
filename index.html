@@ -268,6 +268,8 @@
 
     /* ── Lightbox ── */
     .invite-img-wrap { cursor: zoom-in; position: relative; }
+    .invite-img-wrap img { cursor: zoom-in; }
+    .img-placeholder { cursor: zoom-in; }
     .zoom-hint {
       position: absolute; bottom: 8px; right: 10px;
       background: rgba(0,0,0,0.45); color: #fff;
@@ -301,6 +303,131 @@
     }
     .lightbox-close:hover { opacity: 1; transform: scale(1.15); }
 
+    /* ── RSVP Counter ── */
+    .rsvp-counter {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      background: linear-gradient(135deg, #e0f4ff, #e0fff8);
+      border-top: 2px solid #c2e4ff;
+      border-bottom: 2px solid #c2e4ff;
+      padding: 0.9rem 1rem;
+    }
+    .counter-stat {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+    .counter-num {
+      font-family: 'Pacifico', cursive;
+      font-size: 1.8rem;
+      color: #1e9eff;
+      line-height: 1;
+      animation: none;
+    }
+    .counter-num.bump {
+      animation: bump 0.4s cubic-bezier(.22,1,.36,1);
+    }
+    @keyframes bump {
+      0%   { transform: scale(1); }
+      50%  { transform: scale(1.35); color: #06d6a0; }
+      100% { transform: scale(1); }
+    }
+    .counter-label {
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+    }
+    .counter-divider {
+      width: 1px;
+      height: 36px;
+      background: #b0d8f0;
+      margin: 0 0.5rem;
+    }
+
+    /* ── Guest List Modal ── */
+    .counter-stat--clickable {
+      cursor: pointer;
+      border-radius: 12px;
+      transition: background 0.15s, transform 0.15s;
+      padding: 0.3rem 0.5rem;
+    }
+    .counter-stat--clickable:hover {
+      background: rgba(30,158,255,0.1);
+      transform: scale(1.06);
+    }
+    .counter-stat--clickable .counter-label::after {
+      content: ' 👁';
+      font-size: 0.65rem;
+    }
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0; z-index: 998;
+      background: rgba(0,0,0,0.55);
+      align-items: center; justify-content: center;
+      padding: 1rem;
+      animation: fadeIn 0.2s ease;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: #fff;
+      border-radius: 24px;
+      padding: 1.5rem;
+      width: 100%; max-width: 380px;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 12px 48px rgba(0,0,0,0.18);
+      animation: zoomIn 0.25s cubic-bezier(.22,1,.36,1);
+    }
+    .modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    .modal-header h3 {
+      font-family: 'Pacifico', cursive;
+      font-size: 1.2rem; color: #1e9eff; margin: 0;
+    }
+    .modal-close {
+      font-size: 1.4rem; cursor: pointer; color: var(--muted);
+      line-height: 1; transition: color 0.15s, transform 0.15s;
+    }
+    .modal-close:hover { color: #1e9eff; transform: scale(1.2); }
+    .guest-item {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.65rem 0.75rem;
+      border-radius: 12px;
+      background: #f0f8ff;
+      margin-bottom: 0.5rem;
+      animation: slideIn 0.2s ease both;
+    }
+    @keyframes slideIn {
+      from { opacity:0; transform: translateX(-10px); }
+      to   { opacity:1; transform: translateX(0); }
+    }
+    .guest-avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: linear-gradient(135deg, #1e9eff, #06d6a0);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; font-weight: 800; color: #fff;
+      flex-shrink: 0;
+    }
+    .guest-info { flex: 1; }
+    .guest-name { font-weight: 800; font-size: 0.95rem; color: var(--text); }
+    .guest-detail { font-size: 0.75rem; color: var(--muted); font-weight: 600; margin-top: 1px; }
+    .modal-empty {
+      text-align: center; padding: 1.5rem;
+      color: var(--muted); font-weight: 700; font-size: 0.9rem;
+    }
+    .modal-loading {
+      text-align: center; padding: 1.5rem;
+      color: #1e9eff; font-weight: 700; font-size: 0.9rem;
+    }
+
     @media (max-width: 460px) {
       .details { grid-template-columns: 1fr; }
       .row-2 { grid-template-columns: 1fr; }
@@ -324,16 +451,37 @@
   <!-- Invitation Image -->
   <div class="invite-img-wrap">
     <!--
-      TO USE YOUR OWN IMAGE:
-      1. Place your image file (e.g. party.jpg) in the same folder as this index.html
-      2. Replace the img-placeholder div below with:
-         <img src="party.jpg" alt="Birthday Invitation" />
+      TWO IMAGES:
+      1. cardImage  — shown on the card (preview/thumbnail)
+      2. zoomImage  — opens in lightbox when clicked (can be same or different/hi-res)
+      Set both in the PARTY config object in the <script> below.
     -->
-    
-	<img src="partyInvite3.PNG" alt="Birthday Invitation" onclick="openLightbox(this.src)" />
-    
+    <div class="img-placeholder" id="imgPlaceholder" onclick="openLightbox()">
+      <span class="cam">📸</span>
+      <strong>Set cardImage &amp; zoomImage in the PARTY config</strong>
+      <span>Edit the PARTY object in the script to point to your image files.</span>
+    </div>
+    <div class="zoom-hint">🔍 Tap to zoom</div>
   </div>
 
+
+  <!-- RSVP Counter -->
+  <div class="rsvp-counter" id="rsvpCounter">
+    <div class="counter-stat counter-stat--clickable" onclick="openGuestList()" title="See who's coming">
+      <span class="counter-num" id="totalFamilies">0</span>
+      <span class="counter-label">Families</span>
+    </div>
+    <div class="counter-divider"></div>
+    <div class="counter-stat">
+      <span class="counter-num" id="totalKids">0</span>
+      <span class="counter-label">Kids 🧒</span>
+    </div>
+    <div class="counter-divider"></div>
+    <div class="counter-stat">
+      <span class="counter-num" id="totalAdults">0</span>
+      <span class="counter-label">Adults 👨‍👩</span>
+    </div>
+  </div>
 
   <!-- RSVP Form -->
   <div class="form-section" id="formSection">
@@ -390,6 +538,19 @@
   </div>
 </div>
 
+<!-- Guest List Modal -->
+<div class="modal-overlay" id="guestModal" onclick="closeGuestList(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3>🎉 Who's Coming</h3>
+      <span class="modal-close" onclick="closeGuestList()">✕</span>
+    </div>
+    <div id="guestListBody">
+      <div class="modal-loading">Loading guests…</div>
+    </div>
+  </div>
+</div>
+
 <script>
   /* ═══════════════════════════════════════════════
      ✏️  CUSTOMIZE YOUR PARTY DETAILS HERE
@@ -401,26 +562,44 @@
     date:        "Saturday, May 29, 2026 · 6:00 PM",  // Party date
     venue:       "Sky Zone Roswell",
     rsvpBy:      "May 26, 2026",
+    cardImage:   "partyInvite3.PNG",
+    zoomImage:   "partyInvite2.PNG",
     // Google Sheets webhook (optional — see README below)
     // Set to "" to skip, responses will only show confirmation
-    sheetsWebhook: "https://script.google.com/macros/s/AKfycbz2BgrwVyoCK8pKUAHImB0rhYx40X4X6S_GKJJN0p3kKo-gVaMyeBMiEI1W2wsnFRJNaA/exec"
+    sheetsReadUrl: "https://script.google.com/macros/s/AKfycbyf8SVLs1BWp1lvd61j4mAIky9hml2HS-7A5ozw5YFutIAkTe1_yd1R2SVc6TxfZUGiCw/exec",
+    sheetsWebhook: "https://script.google.com/macros/s/AKfycbyf8SVLs1BWp1lvd61j4mAIky9hml2HS-7A5ozw5YFutIAkTe1_yd1R2SVc6TxfZUGiCw/exec"
   };
   /* ═══════════════════════════════════════════════ */
 
   // Populate details
   document.getElementById('rsvpDeadline').textContent = PARTY.rsvpBy;
 
-  // Lightbox
+  // Inject card image dynamically
+  const wrap = document.querySelector('.invite-img-wrap');
+  if (PARTY.cardImage) {
+    const placeholder = document.getElementById('imgPlaceholder');
+    const cardImg = document.createElement('img');
+    cardImg.src = PARTY.cardImage;
+    cardImg.alt = 'Birthday Invitation';
+    cardImg.style.cssText = 'width:100%;display:block;max-height:320px;object-fit:cover;cursor:zoom-in;';
+    cardImg.onclick = () => openLightbox();
+    wrap.replaceChild(cardImg, placeholder);
+  }
+
+  // Lightbox — mobile shows zoomImage, desktop zooms cardImage
   function openLightbox() {
-    const img = document.querySelector('.invite-img-wrap img');
     const lb  = document.getElementById('lightbox');
-    if (img) {
-      document.getElementById('lightboxImg').src = img.src;
-      document.getElementById('lightboxImg').style.display = 'block';
-      document.getElementById('lightboxMsg').style.display = 'none';
+    const img = document.getElementById('lightboxImg');
+    const msg = document.getElementById('lightboxMsg');
+    const isMobile = window.innerWidth < 768;
+    const src = isMobile ? (PARTY.zoomImage || PARTY.cardImage) : PARTY.cardImage;
+    if (src) {
+      img.src = src;
+      img.style.display = 'block';
+      msg.style.display = 'none';
     } else {
-      document.getElementById('lightboxImg').style.display = 'none';
-      document.getElementById('lightboxMsg').style.display = 'block';
+      img.style.display = 'none';
+      msg.style.display = 'block';
     }
     lb.classList.add('open');
     document.body.style.overflow = 'hidden';
@@ -430,6 +609,107 @@
     document.body.style.overflow = '';
   }
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+  // RSVP Totals — fetched live from Google Sheets if configured, else localStorage fallback
+  function renderTotals(t, animate) {
+    ['families','kids','adults'].forEach(key => {
+      const el = document.getElementById('total' + key.charAt(0).toUpperCase() + key.slice(1));
+      el.textContent = t[key] ?? 0;
+      if (animate) {
+        el.classList.remove('bump');
+        void el.offsetWidth;
+        el.classList.add('bump');
+      }
+    });
+  }
+
+  function loadLocalTotals() {
+    return JSON.parse(localStorage.getItem('rsvp_totals') || '{"families":0,"kids":0,"adults":0}');
+  }
+  function saveLocalTotals(t) {
+    localStorage.setItem('rsvp_totals', JSON.stringify(t));
+  }
+
+  async function fetchSheetTotals() {
+    if (!PARTY.sheetsReadUrl) {
+      renderTotals(loadLocalTotals(), false);
+      return;
+    }
+    // Show loading dots
+    ['totalFamilies','totalKids','totalAdults'].forEach(id => {
+      document.getElementById(id).textContent = '…';
+    });
+    try {
+      const res  = await fetch(PARTY.sheetsReadUrl);
+      const data = await res.json();
+      // Expects: { families: N, kids: N, adults: N }
+      renderTotals(data, false);
+    } catch {
+      // Fallback to localStorage if fetch fails
+      renderTotals(loadLocalTotals(), false);
+    }
+  }
+  fetchSheetTotals();
+
+  // Local guest list fallback (when no Sheets configured)
+  function loadLocalGuests() {
+    return JSON.parse(localStorage.getItem('rsvp_guests') || '[]');
+  }
+  function saveLocalGuest(entry) {
+    const guests = loadLocalGuests();
+    guests.push(entry);
+    localStorage.setItem('rsvp_guests', JSON.stringify(guests));
+  }
+
+  // Guest List Modal
+  async function openGuestList() {
+    document.getElementById('guestModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    const body = document.getElementById('guestListBody');
+    body.innerHTML = '<div class="modal-loading">⏳ Loading guests…</div>';
+
+    let guests = [];
+    if (PARTY.sheetsReadUrl) {
+      try {
+        const res  = await fetch(PARTY.sheetsReadUrl + '?list=1');
+        const data = await res.json();
+        // Expects: { guests: [{name, kids, adults}, ...] }
+        guests = data.guests || [];
+      } catch {
+        guests = loadLocalGuests();
+      }
+    } else {
+      guests = loadLocalGuests();
+    }
+
+    if (!guests.length) {
+      body.innerHTML = '<div class="modal-empty">No RSVPs yet — be the first! 🎈</div>';
+      return;
+    }
+
+    body.innerHTML = guests.map((g, i) => `
+      <div class="guest-item" style="animation-delay:${i * 0.05}s">
+        <div class="guest-avatar">${g.name.charAt(0).toUpperCase()}</div>
+        <div class="guest-info">
+          <div class="guest-name">${g.name}</div>
+          <div class="guest-detail">${g.kids} kid${g.kids!==1?'s':''} · ${g.adults} adult${g.adults!==1?'s':''}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function closeGuestList(e) {
+    if (e && e.target !== document.getElementById('guestModal')) return;
+    document.getElementById('guestModal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      closeLightbox();
+      document.getElementById('guestModal').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+  });
 
   // Counter state
   const counts = { kids: 0, adults: 1 };
@@ -454,14 +734,27 @@
       timestamp: new Date().toISOString()
     };
 
-    // Optional: send to Google Sheets
+    // Optional: send to Google Sheets then refresh totals
+    // Always save guest locally for offline fallback
+    saveLocalGuest({ name, kids: counts.kids, adults: counts.adults });
+
     if (PARTY.sheetsWebhook) {
       fetch(PARTY.sheetsWebhook, {
         method: 'POST',
         mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
-      }).catch(() => {});
+      })
+      .then(() => setTimeout(fetchSheetTotals, 1200)) // re-fetch after short delay
+      .catch(() => {});
+    } else {
+      // Fallback: update localStorage totals locally
+      const totals = loadLocalTotals();
+      totals.families += 1;
+      totals.kids     += counts.kids;
+      totals.adults   += counts.adults;
+      saveLocalTotals(totals);
+      renderTotals(totals, true);
     }
 
     // Show success
